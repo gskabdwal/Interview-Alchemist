@@ -7,7 +7,7 @@ export default function HomePage() {
     <>
       <Head>
         <title>Interview Alchemist</title>
-        <link rel="icon" href="../icon.svg" />
+        <link rel="icon" href="/icon.svg" />
       </Head>
       <Home />
     </>
