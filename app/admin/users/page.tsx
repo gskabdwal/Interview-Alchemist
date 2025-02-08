@@ -13,7 +13,7 @@ async function getUsers(searchParams: string) {
     const authHeader = getAuthHeader(nextCookies);
 
     const response = await fetch(
-      `${process.env?.API_URL}/api/admin/users?${queryStr}`,
+      `${process.env?.NEXT_PUBLIC_APP_URL}/api/admin/users?${queryStr}`,
       authHeader
     );
 
