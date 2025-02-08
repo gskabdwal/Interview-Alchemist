@@ -144,7 +144,7 @@ export default function ListInterviews({ data }: ListInterviewProps) {
                           icon="solar:eye-broken"
                           fontSize={22}
                           onClick={() =>
-                            router.push(`/ia/results/${interview._id}`)
+                            router.push(`/admin/interviews/${interview._id}`)
                           }
                         />
                       </span>
