@@ -137,7 +137,7 @@ export default function ListInterviews({ data }: ListInterviewProps) {
                       </Tooltip>
                     )}
 
-                  {interview?.status === "completed" && (
+                  {!isAdminPath(pathname) && interview?.status === "completed" && (
                     <Tooltip content="View Result">
                       <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
                         <Icon
