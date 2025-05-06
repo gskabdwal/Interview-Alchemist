@@ -137,14 +137,16 @@ export default function ListInterviews({ data }: ListInterviewProps) {
                       </Tooltip>
                     )}
 
-                  {interview?.status === "completed" && (
+                  {!isAdminPath(pathname) && interview?.status === "completed" && (
                     <Tooltip content="View Result">
                       <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
                         <Icon
                           icon="solar:eye-broken"
                           fontSize={22}
                           onClick={() =>
-                            router.push(`/ia/results/${interview._id}`)
+                            !isAdminPath(pathname)
+                              ? router.push(`/ia/results/${interview._id}`)
+                              : router.push(`/admin/results/${interview._id}`)
                           }
                         />
                       </span>

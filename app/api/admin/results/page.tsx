@@ -1,7 +1,6 @@
-import ListInterviews from "@/components/interview/ListInterviews";
+import ListResults from "@/components/result/ListResults";
 import { getAuthHeader } from "@/helpers/auth";
 import { cookies } from "next/headers";
-import React from "react";
 
 async function getInterviews(searchParams: string) {
   try {
@@ -12,7 +11,7 @@ async function getInterviews(searchParams: string) {
     const authHeader = getAuthHeader(nextCookies);
 
     const response = await fetch(
-      `${process.env?.NEXT_PUBLIC_APP_URL}/api/admin/interviews?${queryStr}`,
+      `${process.env?.NEXT_PUBLIC_APP_URL}/api/interviews?${queryStr}`,
       authHeader
     );
 
@@ -27,7 +26,7 @@ async function getInterviews(searchParams: string) {
   }
 }
 
-const InterviewsPage = async ({
+const ResultsPage = async ({
   searchParams,
 }: {
   searchParams: Promise<string>;
@@ -35,7 +34,7 @@ const InterviewsPage = async ({
   const searchParamsValue = await searchParams;
 
   const data = await getInterviews(searchParamsValue);
-  return <ListInterviews data={data} />;
+  return <ListResults data={data} />;
 };
 
-export default InterviewsPage;
+export default ResultsPage;

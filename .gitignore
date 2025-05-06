@@ -21,6 +21,7 @@
 /build
 
 #env
+.env.local
 .env.production
 
 # misc

@@ -12,7 +12,7 @@ async function getDashboardStats(searchParams: string) {
     const authHeader = getAuthHeader(nextCookies);
 
     const response = await fetch(
-      `${process.env?.API_URL}/api/admin/stats?${queryStr}`,
+      `${process.env?.NEXT_PUBLIC_APP_URL}/api/admin/stats?${queryStr}`,
       authHeader
     );
 

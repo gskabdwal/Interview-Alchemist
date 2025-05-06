@@ -9,11 +9,7 @@ import Testimonials from "./layout/testimonials/Testimonials";
 
 const Home = () => {
   return (
-    <>
-      <Head>
-        <title>Interview Alchemist</title>
-        <link rel="icon" href="/icon.svg" />
-      </Head>
+    
       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
         <Button
           className="h-9 overflow-hidden border-1 border-default-100 bg-default-50 px-[18px] py-2 text-small font-normal leading-5 text-default-500"
@@ -74,7 +70,7 @@ const Home = () => {
 
         <InterviewProcessCards />
       </section>
-    </>
+    
   );
 };
 

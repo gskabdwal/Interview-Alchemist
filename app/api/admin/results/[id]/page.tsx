@@ -8,7 +8,7 @@ async function getInterview(id: string) {
     const authHeader = getAuthHeader(nextCookies);
 
     const response = await fetch(
-      `${process.env?.NEXT_PUBLIC_APP_URL}/api/interviews/${id}`,
+      `${process.env?.API_URL}/api/interviews/${id}`,
       authHeader
     );
 
