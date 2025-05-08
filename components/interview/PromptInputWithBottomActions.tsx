@@ -196,7 +196,7 @@ export default function PromptInputWithBottomActions({
   const handleVoiceInput = async () => {
     try {
       // Check for browser compatibility
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      if (!navigator.mediaDevices) {
         return toast.error("Voice input is not supported in this browser. Try using Chrome or Edge.");
       }
 
@@ -266,9 +266,8 @@ export default function PromptInputWithBottomActions({
             
             // Automatically switch to MediaRecorder fallback for network errors
             setTimeout(() => {
-              if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                handleVoiceInputWithMediaRecorder();
-              }
+              // Just call the fallback directly since we already checked for mediaDevices support
+              handleVoiceInputWithMediaRecorder();
             }, 1000);
           } else {
             toast.error(`Speech recognition error: ${event.error}`);
