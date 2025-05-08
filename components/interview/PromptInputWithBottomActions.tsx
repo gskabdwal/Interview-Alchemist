@@ -14,9 +14,10 @@ declare global {
   }
 }
 
-const SpeechRecognition =
-  typeof window !== "undefined" &&
-  (window.SpeechRecognition || window.webkitSpeechRecognition);
+// Get the SpeechRecognition constructor if available in the browser
+const SpeechRecognitionConstructor =
+  typeof window !== "undefined" ?
+  (window.SpeechRecognition || window.webkitSpeechRecognition) : undefined;
 
 export default function PromptInputWithBottomActions({
   value,
@@ -32,96 +33,28 @@ export default function PromptInputWithBottomActions({
     onChange(value);
   };
 
-  const handleVoiceInput = async () => {
+  // Function to handle voice input using MediaRecorder API (better for mobile and fallback for Brave)
+  const handleVoiceInputWithMediaRecorder = async () => {
     try {
-      // Check for browser compatibility
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        return toast.error("Voice input is not supported in this browser. Try using Chrome or Edge.");
-      }
-
-      // Try to use SpeechRecognition API first (works better on laptops)
-      if (window.SpeechRecognition || window.webkitSpeechRecognition) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-        
-        let recognitionActive = true;
-        
-        // Show recording indicator
-        const toastId = toast.success("Listening... Speak your answer (tap to stop)", {
-          duration: 10000,
-          position: "top-center"
-        });
-        
-        // Add click listener to dismiss toast and stop recognition
-        const dismissListener = () => {
-          recognition.stop();
-          toast.dismiss(toastId);
-          document.removeEventListener('click', dismissListener);
-        };
-        
-        // Add event listener with delay to prevent immediate triggering
-        setTimeout(() => {
-          document.addEventListener('click', dismissListener);
-        }, 1000);
-        
-        recognition.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript;
-          if (transcript.trim()) {
-            // Append to existing text with a space
-            const newText = prompt ? prompt + " " + transcript : transcript;
-            handleValueChange(newText);
-            toast.success("Speech processed successfully!", {
-              duration: 2000,
-              position: "top-center"
-            });
-          }
-        };
-        
-        recognition.onerror = (event: any) => {
-          console.error('Speech recognition error', event.error);
-          toast.error(`Speech recognition error: ${event.error}`);
-          recognitionActive = false;
-        };
-        
-        recognition.onend = () => {
-          if (recognitionActive) {
-            toast.dismiss(toastId);
-          }
-        };
-        
-        recognition.start();
-        
-        // Automatically stop after 30 seconds to prevent hanging
-        setTimeout(() => {
-          if (recognitionActive) {
-            recognition.stop();
-          }
-        }, 30000);
-        
-        return;
-      }
-      
-      // Fallback to MediaRecorder API (works better on mobile)
       // Request microphone access
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
       // Determine supported MIME types
       let mimeType = 'audio/webm';
-      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-        mimeType = 'audio/webm;codecs=opus';
-      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-        mimeType = 'audio/mp4';
+      // Check if MediaRecorder API is available and supports specific formats
+      if (typeof MediaRecorder !== 'undefined') {
+        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          mimeType = 'audio/webm;codecs=opus';
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        }
       }
       
       const mediaRecorder = new MediaRecorder(stream, { mimeType });
       const audioChunks: Blob[] = [];
 
       // Show recording indicator with stop option
-      const toastId = toast.success("Listening... Speak your answer (tap to stop)", {
+      const toastId = toast.success("Listening with alternative method... Speak your answer (tap to stop)", {
         duration: 10000,
         position: "top-center"
       });
@@ -246,6 +179,122 @@ export default function PromptInputWithBottomActions({
           try { audioContext.close(); } catch (e) {}
         }
       }, 30000);
+
+    } catch (error: any) {
+      console.error("Voice input error:", error);
+      if (error.name === "NotAllowedError") {
+        toast.error("Microphone access denied. Please allow microphone access in your browser settings.");
+      } else if (error.name === "NotFoundError") {
+        toast.error("No microphone found. Please connect a microphone and try again.");
+      } else {
+        toast.error("An error occurred during voice input: " + (error.message || "Unknown error"));
+      }
+    }
+  };
+
+  // Main voice input handler that tries SpeechRecognition first, then falls back to MediaRecorder
+  const handleVoiceInput = async () => {
+    try {
+      // Check for browser compatibility
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        return toast.error("Voice input is not supported in this browser. Try using Chrome or Edge.");
+      }
+
+      // Detect if we're in Brave browser (which often has issues with SpeechRecognition)
+      // Just check the user agent string since the navigator.brave property isn't standard
+      const isBrave = navigator.userAgent.includes("Brave");
+
+      // If we're in Brave, skip straight to MediaRecorder API
+      if (isBrave) {
+        console.log("Brave browser detected, using MediaRecorder API directly");
+        return handleVoiceInputWithMediaRecorder();
+      }
+
+      // Try to use SpeechRecognition API first (works better on laptops)
+      const speechRecognitionAvailable = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+      if (speechRecognitionAvailable) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+        
+        let recognitionActive = true;
+        
+        // Show recording indicator
+        const toastId = toast.success("Listening... Speak your answer (tap to stop)", {
+          duration: 10000,
+          position: "top-center"
+        });
+        
+        // Add click listener to dismiss toast and stop recognition
+        const dismissListener = () => {
+          recognition.stop();
+          toast.dismiss(toastId);
+          document.removeEventListener('click', dismissListener);
+        };
+        
+        // Add event listener with delay to prevent immediate triggering
+        setTimeout(() => {
+          document.addEventListener('click', dismissListener);
+        }, 1000);
+        
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          if (transcript.trim()) {
+            // Append to existing text with a space
+            const newText = prompt ? prompt + " " + transcript : transcript;
+            handleValueChange(newText);
+            toast.success("Speech processed successfully!", {
+              duration: 2000,
+              position: "top-center"
+            });
+          }
+        };
+        
+        recognition.onerror = (event: any) => {
+          console.error('Speech recognition error', event.error);
+          recognitionActive = false;
+          
+          if (event.error === 'network') {
+            // Handle network error specifically (common in Brave browser)
+            toast.error(
+              "Speech recognition network error. This often happens in Brave browser due to privacy settings. Switching to alternative method...", 
+              { duration: 5000 }
+            );
+            
+            // Automatically switch to MediaRecorder fallback for network errors
+            setTimeout(() => {
+              if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                handleVoiceInputWithMediaRecorder();
+              }
+            }, 1000);
+          } else {
+            toast.error(`Speech recognition error: ${event.error}`);
+          }
+        };
+        
+        recognition.onend = () => {
+          if (recognitionActive) {
+            toast.dismiss(toastId);
+          }
+        };
+        
+        recognition.start();
+        
+        // Automatically stop after 30 seconds to prevent hanging
+        setTimeout(() => {
+          if (recognitionActive) {
+            recognition.stop();
+          }
+        }, 30000);
+        
+        return;
+      }
+      
+      // Fallback to MediaRecorder API if SpeechRecognition is not available
+      handleVoiceInputWithMediaRecorder();
 
     } catch (error: any) {
       console.error("Voice input error:", error);
