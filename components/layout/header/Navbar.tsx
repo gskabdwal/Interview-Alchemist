@@ -173,7 +173,7 @@ const Navbar = () => {
             as={Link}
             size="lg"
             className="flex gap-1"
-            onPress={() => signOut()}
+            onPress={() => signOut({ callbackUrl: '/' })}
           >
             <Icon icon="tabler:logout-2" /> Logout
           </Link>

@@ -24,6 +24,21 @@ export const createSubscription = catchAsyncErrors(
       expand: ["latest_invoice.payment_intent"],
     });
 
+    // Immediately update the user's subscription status in the database
+    await User.findOneAndUpdate(
+      { email },
+      {
+        subscription: {
+          id: subscription.id,
+          customerId: customer.id,
+          status: subscription.status,
+          created: new Date(subscription.created * 1000),
+          startDate: new Date(subscription.current_period_start * 1000),
+          currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        },
+      }
+    );
+
     return { subscription };
   }
 );

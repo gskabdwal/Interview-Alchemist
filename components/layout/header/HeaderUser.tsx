@@ -56,7 +56,7 @@ const HeaderUser = ({ user }: { user: IUser }) => {
             key="logout"
             color="danger"
             startContent={<Icon icon="tabler:logout-2" />}
-            onPress={() => signOut()}
+            onPress={() => signOut({ callbackUrl: '/' })}
           >
             Logout
           </DropdownItem>
