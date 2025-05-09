@@ -11,7 +11,7 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -173,8 +173,9 @@ const CheckoutForm = () => {
           },
         });
         if (updateSession) {
-          toast.success("Subscription successful");
-          router.push("/ia/dashboard");
+          toast.success("Subscription successful! Please sign in again to access your premium features.");
+          // Sign out the user and redirect to sign-in page
+          signOut({ callbackUrl: '/signin' });
         }
       }
     } catch (err: any) {
