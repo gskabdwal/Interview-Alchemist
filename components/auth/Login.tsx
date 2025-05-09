@@ -20,7 +20,7 @@ export default function Login() {
       redirect: false,
       email: data.email,
       password: data.password,
-      callbackUrl: "/ia/dashboard",
+      callbackUrl: "/",
     });
 
     if (res?.error) {
@@ -28,19 +28,19 @@ export default function Login() {
     }
 
     if (res?.ok) {
-      router.push("/ia/dashboard");
+      router.push("/");
     }
   });
 
   const handleGithubLogin = async () => {
     await signIn("github", {
-      callbackUrl: "/ia/dashboard",
+      callbackUrl: "/",
     });
   };
 
   const handleGoogleLogin = async () => {
     await signIn("google", {
-      callbackUrl: "/ia/dashboard",
+      callbackUrl: "/",
     });
   };
 

@@ -10,7 +10,7 @@ export default withAuth(function middleware(req) {
   const isSubscribed = isUserSubscribed(user);
   const isAdminUser = isUserAdmin(user);
 
-  if (url?.startsWith("/app") && !isSubscribed && !isAdminUser) {
+  if ((url?.startsWith("/app") || url?.startsWith("/ia")) && !isSubscribed && !isAdminUser) {
     return NextResponse.redirect(new URL("/", req?.url));
   }
 
@@ -31,6 +31,7 @@ export default withAuth(function middleware(req) {
 export const config = {
   matcher: [
     "/app/:path*",
+    "/ia/:path*",
     "/admin/:path*",
     "/subscribe",
     "/unsubscribe",
